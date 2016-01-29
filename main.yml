@@ -1,0 +1,132 @@
+---
+hier_tags:
+  safe:
+  - section:
+    - startswith: snmp
+    action: add
+  cg_ignore:
+  - section: 
+    - startswith: vdc
+    action: add
+  - section:
+    - startswith: boot
+    action: add
+  - section:
+    - startswith: no boot
+    action: add
+  - section:
+    - startswith: cfs eth distribute
+    action: add
+  - section:
+    - startswith: hardware profile portmode
+    action: add
+  - section:
+    - startswith: no hardware profile portmode
+    action: add
+
+
+hier_options:
+  #if there is a delta, overwrite these parents instead of one of their children
+  sectional_overwrite:
+  - ^((ip|ipv4|ipv6) )?access-list
+
+  sectional_overwrite_no_negate: []
+
+  #adds +1 indent to lines following start_expression and removes the +1 indent for lines following end_expression
+  indent_adjust: []
+
+  parent_allows_duplicate_child: []
+
+  sectional_exiting: []
+
+  #substitions against the full multi-line config text
+  full_text_sub:
+  - search: 'banner exec (\S+)\n(.*\n)+\\1\s*\n'
+    replace: ''
+  - search: 'banner motd (\S+)\n(.*\n)+\\1\s*\n'
+    replace: ''
+
+  #substitions against each line of the config text
+  per_line_sub:
+  - search: ^Building configuration.*
+    replace: ''
+  - search: ^Current configuration.*
+    replace: ''
+  - search: ^ntp clock-period .*
+    replace: ''
+  - search: '^snmp-server location  '
+    replace: 'snmp-server location '
+  - search: ^version.*
+    replace: ''
+  - search: .*authentication message-digest.*
+    replace: ''
+  - search: .*message-digest-key.*
+    replace: ''
+  - search: .*snmp-server user admin network-admin auth.*
+    replace: ''
+  - search: .*password.*
+    replace: ''
+  - search: '!.*'
+    replace: ''
+
+  idempotent_commands_blacklist:
+  - ip address.*secondary
+
+  #These commands do not require negation, they simply overwrite them selves
+  idempotent_commands:
+  - 'cli alias name wr '
+  - aaa authentication login console
+  - maximum-paths
+  - port-channel load-balance
+  - spanning-tree vlan ([\d,-]+) priority
+  - hostname
+  - enable secret
+  - name
+  - send-community
+  - ip tftp source-interface
+  - ip telnet source-interface
+  - ip tacacs source-interface
+  - logging source-interface
+  - description
+  - speed
+  - duplex
+  - switchport mode
+  - switchport access vlan
+  - switchport trunk native vlan
+  - switchport trunk allowed vlan
+  - udld port
+  - ip address
+  - standby 1 ip \d+\.\d+\.\d+\.\d+
+  - transport input
+  - ipv6 access-class
+  - access-class
+  - ip access-group
+  - standby \d+ priority
+  - standby \d+ authentication md5
+  - bgp router-id
+  - router-id
+  - password
+  - mac address-table aging-time
+  - police
+  - channel-group
+  - log-adjacency-changes
+  - neighbor \S+ description
+  - snmp-server community
+  - snmp-server location
+  - exec-timeout
+  - peer-keepalive destination
+  - authentication md5 key-string
+  - soft-reconfiguration
+  - ip ospf cost
+
+  #Default when expression: list of expressions
+  negation_default_when:
+  - ^\s*ip ospf bfd
+  - no ospfv3 passive-interface
+  - no ip ospf passive-interface
+
+
+  #Negate substitutions: expression -> negate with
+  negation_negate_with:
+  - match: maximum-paths
+    use: default maximum-paths
