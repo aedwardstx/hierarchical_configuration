@@ -1,6 +1,8 @@
 import re
 
+
 class TextMatch(object):
+
     """
     Provides a suite of text matching methods
     """
@@ -11,12 +13,12 @@ class TextMatch(object):
         Allows test methods to be called easily from variables
         """
         return {
-                'equals': cls.equals,
-                'startswith': cls.startswith,
-                'endswith': cls.endswith,
-                'contains': cls.contains,
-                're_search': cls.re_search
-                }[test](text, expression)
+            'equals': cls.equals,
+            'startswith': cls.startswith,
+            'endswith': cls.endswith,
+            'contains': cls.contains,
+            're_search': cls.re_search
+        }[test](text, expression)
 
     @staticmethod
     def equals(text, expression):
