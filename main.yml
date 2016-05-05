@@ -1,34 +1,24 @@
 ---
 hier_tags:
-  safe:
-  - section:
-    - startswith: snmp
-    action: add
-  cg_ignore:
-  - section: 
-    - startswith: vdc
-    action: add
-  - section:
-    - startswith: boot
-    action: add
-  - section:
-    - startswith: no boot
-    action: add
-  - section:
-    - startswith: cfs eth distribute
-    action: add
-  - section:
-    - startswith: hardware profile portmode
-    action: add
-  - section:
-    - startswith: no hardware profile portmode
-    action: add
-
+- lineage:
+  - startswith:
+    - snmp
+    - ip access-list resequence
+  add_tags: safe
+- lineage:
+  - startswith:
+    - ip access-list TEST
+    - router ospf
+  add_tags: unsafe 
 
 hier_options:
+  #Indicates the style of the configuration
+  style: ios
+
   #if there is a delta, overwrite these parents instead of one of their children
   sectional_overwrite:
-  - ^((ip|ipv4|ipv6) )?access-list
+  - lineage:
+    - ^((ip|ipv4|ipv6) )?access-list
 
   sectional_overwrite_no_negate: []
 
@@ -37,7 +27,19 @@ hier_options:
 
   parent_allows_duplicate_child: []
 
-  sectional_exiting: []
+  sectional_exiting:
+  - lineage:
+    - startswith: router bgp
+    - startswith: template peer-policy
+    exit_text: exit-peer-policy
+  - lineage:
+    - startswith: router bgp
+    - startswith: template peer-session
+    exit_text: exit-peer-session
+  - lineage:
+    - startswith: router bgp
+    - startswith: address-family
+    exit_text: exit-address-family
 
   #substitions against the full multi-line config text
   full_text_sub:
@@ -52,81 +54,112 @@ hier_options:
     replace: ''
   - search: ^Current configuration.*
     replace: ''
+  - search: ^! Last configuration change.*
+    replace: ''
+  - search: ^! NVRAM config last updated.*
+    replace: ''
   - search: ^ntp clock-period .*
-    replace: ''
-  - search: '^snmp-server location  '
-    replace: 'snmp-server location '
-  - search: ^version.*
-    replace: ''
-  - search: .*authentication message-digest.*
     replace: ''
   - search: .*message-digest-key.*
     replace: ''
-  - search: .*snmp-server user admin network-admin auth.*
+  - search: ^version.*
     replace: ''
   - search: .*password.*
     replace: ''
-  - search: '!.*'
+  - search: ^ logging event link-status$
+    replace: ''
+  - search: ^ logging event subif-link-status$
+    replace: ''
+  - search: ^\s*ipv6 unreachables disable$
+    replace: ''
+  - search: ^\s*key .*
+    replace: ''
+  - search: ^end$
+    replace: ''
+  - search: '^\s*[#!].*'
+    replace: ''
+  - search: ^ no ip address
+    replace: ''
+  - search: ^ exit-peer-policy
+    replace: ''
+  - search: ^ exit-peer-session
+    replace: ''
+  - search: ^ exit-address-family
+    replace: ''
+  - search: ^crypto key generate rsa general-keys.*$
+    replace: ''
+  - search: .*key-string.*
     replace: ''
 
-  idempotent_commands_blacklist:
-  - ip address.*secondary
+  idempotent_commands_blacklist: []
 
   #These commands do not require negation, they simply overwrite them selves
   idempotent_commands:
-  - 'cli alias name wr '
-  - aaa authentication login console
-  - maximum-paths
-  - port-channel load-balance
-  - spanning-tree vlan ([\d,-]+) priority
-  - hostname
-  - enable secret
-  - name
-  - send-community
-  - ip tftp source-interface
-  - ip telnet source-interface
-  - ip tacacs source-interface
-  - logging source-interface
-  - description
-  - speed
-  - duplex
-  - switchport mode
-  - switchport access vlan
-  - switchport trunk native vlan
-  - switchport trunk allowed vlan
-  - udld port
-  - ip address
-  - standby 1 ip \d+\.\d+\.\d+\.\d+
-  - transport input
-  - ipv6 access-class
-  - access-class
-  - ip access-group
-  - standby \d+ priority
-  - standby \d+ authentication md5
-  - bgp router-id
-  - router-id
-  - password
-  - mac address-table aging-time
-  - police
-  - channel-group
-  - log-adjacency-changes
-  - neighbor \S+ description
-  - snmp-server community
-  - snmp-server location
-  - exec-timeout
-  - peer-keepalive destination
-  - authentication md5 key-string
-  - soft-reconfiguration
-  - ip ospf cost
+  - lineage:
+    - startswith: hostname
+  - lineage:
+    - startswith: logging source-interface
+  - lineage:
+    - startswith: interface
+    - startswith: description
+  - lineage:
+    - startswith: interface
+    - startswith: ip address
+  - lineage:
+    - startswith: line vty
+    - startswith:
+      - transport input
+      - access-class
+      - ipv6 access-class
+  - lineage:
+    - startswith: interface
+    - re_search: standby \d+ (priority|authentication md5)
+  - lineage:
+    - startswith: router bgp
+    - startswith: bgp router-id
+  - lineage:
+    - startswith: router ospf
+    - startswith: router-id
+  - lineage:
+    - startswith: ipv6 router ospf
+    - startswith: router-id
+  - lineage:
+    - startswith: router ospf
+    - startswith: log-adjacency-changes
+  - lineage:
+    - startswith: ipv6 router ospf
+    - startswith: log-adjacency-changes
+  - lineage:
+    - startswith: router bgp
+    - re_search: neighbor \S+ description
+  - lineage:
+    - startswith: snmp-server community
+  - lineage:
+    - startswith: snmp-server location
+  - lineage:
+    - equals: line con 0
+    - startswith: exec-timeout
+  - lineage:
+    - startswith: interface
+    - startswith: ip ospf message-digest-key
+  - lineage:
+    - startswith: logging buffered
+  - lineage:
+    - startswith: tacacs-server key
+  - lineage:
+    - startswith: logging facility
+  - lineage:
+    - startswith: vlan internal allocation policy
+  - lineage:
+    - startswith: tacacs-server host
 
   #Default when expression: list of expressions
-  negation_default_when:
-  - ^\s*ip ospf bfd
-  - no ospfv3 passive-interface
-  - no ip ospf passive-interface
-
+  negation_default_when: []
+  #- lineage:
+  #  - startswith: interface
 
   #Negate substitutions: expression -> negate with
-  negation_negate_with:
-  - match: maximum-paths
-    use: default maximum-paths
+  negation_negate_with: []
+  #- lineage:
+  #  - startswith: interface
+  #  use: command
