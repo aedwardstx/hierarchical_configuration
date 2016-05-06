@@ -2,13 +2,41 @@
 hier_tags:
 - lineage:
   - startswith:
-    - snmp
+    - ip domain-name
+    - no ip domain-name
+    - ip domain-lookup
+    - no ip domain-lookup
+    - logging
+    - no logging
+    - snmp-server 
+    - no snmp-server 
+    - ntp server
+    - no ntp server
+    - ip tcp path-mtu-discovery
     - ip access-list resequence
-  add_tags: safe
+  add_tags: safe 
 - lineage:
+  - startswith: line
+  - startswith: exec-timeout
+  add_tags: safe 
+- lineage:
+  - startswith: interface
+  - startswith: ip access-group
+  add_tags: unsafe 
+- lineage:
+  - startswith: router ospf
+    new_in_config: false
   - startswith:
-    - ip access-list TEST
-    - router ospf
+    - ispf
+    - nsf
+    - log
+  add_tags: safe 
+- lineage: 
+  - startswith: router ospf
+    new_in_config: false
+  - startswith:
+    - network 
+    - area
   add_tags: unsafe 
 
 hier_options:
@@ -18,7 +46,38 @@ hier_options:
   #if there is a delta, overwrite these parents instead of one of their children
   sectional_overwrite:
   - lineage:
-    - ^((ip|ipv4|ipv6) )?access-list
+    - startswith: ipv6 access-list
+
+  ordering:
+  - lineage:
+    - startswith:
+      - ip access-list
+      - access-list
+    order: 300
+  - lineage:
+    - startswith:
+      - tacacs-server host
+    order: 400
+  - lineage:
+    - startswith: interface
+    - startswith:
+      - ip access-group
+      - no ip access-group
+    order: 400
+  - lineage:
+    - startswith:
+      - no ip access-list
+      - no access-list
+      - no ipv6 access-list
+      - no ip prefix-list
+      - no tacacs-server host
+    order: 590 
+  - lineage:
+    - contains: ip spd queue min-threshold
+    order: 601
+  - lineage:
+    - contains: ip spd queue max-threshold
+    order: 602
 
   sectional_overwrite_no_negate: []
 
@@ -93,7 +152,7 @@ hier_options:
 
   idempotent_commands_blacklist: []
 
-  #These commands do not require negation, they simply overwrite them selves
+  #These commands do not require negation, they simply overwrite themselves
   idempotent_commands:
   - lineage:
     - startswith: hostname
@@ -150,8 +209,6 @@ hier_options:
     - startswith: logging facility
   - lineage:
     - startswith: vlan internal allocation policy
-  - lineage:
-    - startswith: tacacs-server host
 
   #Default when expression: list of expressions
   negation_default_when: []
