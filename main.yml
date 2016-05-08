@@ -2,6 +2,15 @@
 hier_tags:
 - lineage:
   - startswith:
+    - ip access-list extended TEST
+    - no ip access-list extended TEST
+  add_tags: NEW_ACL
+- lineage:
+  - startswith: interface
+  - startswith: ip access-group TEST
+  add_tags: NEW_ACL
+- lineage:
+  - startswith:
     - ip domain-name
     - no ip domain-name
     - ip domain-lookup
@@ -68,7 +77,6 @@ hier_options:
     - startswith:
       - no ip access-list
       - no access-list
-      - no ipv6 access-list
       - no ip prefix-list
       - no tacacs-server host
     order: 590 
