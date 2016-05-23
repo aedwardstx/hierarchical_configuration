@@ -17,21 +17,21 @@ hier_tags:
     - no ip domain-lookup
     - logging
     - no logging
-    - snmp-server 
-    - no snmp-server 
+    - snmp-server
+    - no snmp-server
     - ntp server
     - no ntp server
     - ip tcp path-mtu-discovery
     - ip access-list resequence
-  add_tags: safe 
+  add_tags: safe
 - lineage:
   - startswith: line
   - startswith: exec-timeout
-  add_tags: safe 
+  add_tags: safe
 - lineage:
   - startswith: interface
   - startswith: ip access-group
-  add_tags: unsafe 
+  add_tags: unsafe
 - lineage:
   - startswith: router ospf
     new_in_config: false
@@ -39,14 +39,14 @@ hier_tags:
     - ispf
     - nsf
     - log
-  add_tags: safe 
-- lineage: 
+  add_tags: safe
+- lineage:
   - startswith: router ospf
     new_in_config: false
   - startswith:
-    - network 
+    - network
     - area
-  add_tags: unsafe 
+  add_tags: unsafe
 
 hier_options:
   #Indicates the style of the configuration
@@ -79,7 +79,7 @@ hier_options:
       - no access-list
       - no ip prefix-list
       - no tacacs-server host
-    order: 590 
+    order: 590
   - lineage:
     - contains: ip spd queue min-threshold
     order: 601

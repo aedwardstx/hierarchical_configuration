@@ -3,7 +3,6 @@ import sys
 import copy
 from text_match import TextMatch
 
-
 class HierarchicalConfiguration(object):
 
     """

@@ -1,0 +1,48 @@
+ip access-list extended vty
+ permit ip host 10.4.1.9 any
+ permit ip host 69.20.0.4 any
+ permit ip host 69.20.0.12 any
+ permit ip any 10.4.106.0 0.0.0.255
+ permit ip 10.0.150.0 0.127.0.255 any
+ permit ip 10.0.125.0 0.127.0.255 any
+ permit ip 10.4.108.0 0.0.0.15 any
+ permit ip host 10.4.126.56 any
+ permit ip 10.0.255.64 0.127.0.31 any
+!
+router ospf 65000
+ max-metric router-lsa summary-lsa external-lsa on-startup wait-for-bgp
+ ispf
+ log-adjacency-changes
+ auto-cost reference-bandwidth 1000000
+!
+router bgp 65000
+ no bgp default ipv4-unicast
+ bgp log-neighbor-changes
+ neighbor RR-Client peer-group
+ neighbor RR-Client remote-as 65000
+ neighbor RR-Client update-source Loopback0
+ neighbor 10.4.2.234 remote-as 65000
+ neighbor 10.4.2.234 peer-group RR-Client
+ neighbor 10.4.2.234 description RR1B
+ neighbor 10.4.2.235 remote-as 65000
+ neighbor 10.4.2.235 peer-group RR-Client
+ neighbor 10.4.2.235 description RR1A
+ neighbor 2001:4802:800:C5:5001:C1:5:1 remote-as 65000
+ neighbor 2001:4802:800:C5:5001:C1:5:1 inherit peer-session SERVICENET_V6
+ maximum-paths ibgp 8
+ !
+ address-family ipv4
+  neighbor RR-Client soft-reconfiguration inbound
+  neighbor 10.4.2.234 activate
+  neighbor 10.4.2.235 activate
+  maximum-paths ibgp 8
+  no auto-summary
+  no synchronization
+ exit-address-family
+ !
+ address-family ipv6
+  neighbor 2001:4802:800:C5:5001:C1:5:1 activate
+  neighbor 2001:4802:800:C5:5001:C1:5:1 inherit peer-policy SERVICENET_V6
+  no synchronization
+  maximum-paths ibgp 8
+ exit-address-family
